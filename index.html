@@ -1,69 +1,168 @@
-:root{
-  --maxw:1100px;
-  --bg:#f7f5f3;
-  --accent:#6c63ff;
-  --muted:#9aa0a6;
-  --paper:#fffdfb;
-  --tab-shadow: 0 8px 24px rgba(0,0,0,0.12);
-}
-*{box-sizing:border-box}
-body{margin:0;font-family:'Poppins',system-ui,Arial,sans-serif;background:var(--bg);color:#222}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,0.04)}
-.brand h1{margin:0;font-size:18px}
-.mainnav .navbtn{background:transparent;border:none;padding:8px 12px;margin-left:6px;font-weight:600;cursor:pointer;border-radius:8px}
-.mainnav .navbtn.active{background:linear-gradient(90deg,#fff,#f3f3ff);box-shadow:0 2px 8px rgba(0,0,0,0.06)}
-.page{max-width:var(--maxw);margin:22px auto;padding:18px;display:none}
-.page.active-page{display:block}
-.planner-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
-.week-tab{min-width:360px;padding:10px 18px;border-radius:12px;color:#fff;font-weight:700;text-align:center;box-shadow:var(--tab-shadow)}
-.week-controls button{background:#fff;border:1px solid #eee;padding:8px 10px;border-radius:8px;cursor:pointer}
-.planner-content{display:flex;gap:18px}
-.spread{flex:1;background:var(--paper);padding:16px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,0.06);min-height:520px;display:flex;flex-direction:column}
-.page-left .day,.page-right .day{background:transparent;border-radius:10px;padding:12px;margin-bottom:12px;border:1px solid rgba(0,0,0,0.04)}
-.day-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.day-title{font-weight:700}
-.day-date{font-size:13px;color:var(--muted)}
-.events{min-height:56px;padding:8px;border-radius:8px;background:
-  repeating-linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 23px, #eaeaea 24px);
-  overflow:auto}
-.event-item{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;background:rgba(108,99,255,0.06);margin-bottom:8px}
-.event-time{min-width:70px;font-weight:700;color:#222}
-.add-row{display:flex;gap:8px;margin-top:8px;align-items:center}
-.add-row input[type="time"]{width:110px;padding:8px;border-radius:8px;border:1px solid #eee}
-.add-row input[type="text"]{flex:1;padding:8px;border-radius:8px;border:1px solid #eee}
-.btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
-.btn.ghost{background:transparent;border:1px solid #eee;color:#333}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>My Planner</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand">
+        <h1>My Planner</h1>
+      </div>
+      <nav class="mainnav">
+        <button class="navbtn active" data-page="planner">Planner</button>
+        <button class="navbtn" data-page="notes">Notes</button>
+        <button class="navbtn" data-page="reminders">Reminders</button>
+        <button class="navbtn" data-page="docs">Documents</button>
+      </nav>
+    </header>
 
-/* footer controls */
-.planner-footer{display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:12px}
+    <!-- PLANNER PAGE -->
+    <main id="planner" class="page active-page">
+      <div class="planner-top">
+        <div class="week-controls">
+          <button id="prevWeek" title="Previous week">◀</button>
+        </div>
 
-/* notes (stickies) */
-.notes-topbar{display:flex;gap:12px;align-items:center;margin-bottom:12px}
-.stickiesArea{display:flex;flex-wrap:wrap;gap:12px}
-.sticky{width:200px;min-height:120px;padding:12px;border-radius:8px;box-shadow:0 8px 20px rgba(0,0,0,0.06);position:relative}
-.sticky textarea{width:100%;height:100%;border:none;background:transparent;font-family:inherit;resize:none;outline:none}
-.sticky .remove{position:absolute;top:8px;right:8px;border:none;background:transparent;cursor:pointer}
+        <div id="weekTab" class="week-tab">Loading...</div>
 
-/* reminders */
-.reminders-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.rem-list{list-style:none;padding:0}
-.rem-item{display:flex;align-items:center;gap:12px;padding:8px;border-radius:8px;border:1px solid #f0f0f0;margin-bottom:8px}
-.rem-bullet{width:18px;height:18px;border-radius:50%;border:2px solid #6c63ff;display:inline-block;cursor:pointer;flex-shrink:0}
+        <div class="week-controls">
+          <button id="nextWeek" title="Next week">▶</button>
+        </div>
+      </div>
 
-/* docs */
-.docs-top{display:flex;gap:8px;align-items:center;margin-bottom:10px}
-.docs-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-.tool{padding:6px 8px;border-radius:6px;border:1px solid #eee;background:#fff;cursor:pointer}
-.docEditor{min-height:300px;padding:16px;border-radius:8px;border:1px solid #eee;background:#fff}
+      <div class="planner-content">
+        <div id="leftSpread" class="spread page-left"></div>
+        <div id="rightSpread" class="spread page-right"></div>
+      </div>
 
-/* docs list */
-.docs-list-area{margin-top:12px}
-.docs-list-area ul{list-style:none;padding:0}
-.docs-list-area li{padding:8px;border:1px dashed #eee;margin-bottom:8px;border-radius:8px;display:flex;justify-content:space-between;align-items:center}
+      <div class="planner-footer">
+        <label>Background:
+          <select id="bgChoice">
+            <option value="solid">Solid (default)</option>
+            <option value="spring">Spring (cherry blossoms)</option>
+            <option value="summer">Summer (beach)</option>
+            <option value="fall">Fall (leaves)</option>
+            <option value="winter">Winter (snow)</option>
+          </select>
+        </label>
 
-/* responsive */
-@media(max-width:920px){
-  .planner-content{flex-direction:column}
-  .week-tab{min-width:240px}
-}
+        <label>Page color:
+          <input id="pageColor" type="color" value="#fff0dd">
+        </label>
+
+        <label>Font color:
+          <input id="plannerFontColor" type="color" value="#222222">
+        </label>
+
+        <label>Font size:
+          <select id="plannerFontSize">
+            <option value="13">13px</option>
+            <option value="14" selected>14px</option>
+            <option value="16">16px</option>
+            <option value="18">18px</option>
+          </select>
+        </label>
+      </div>
+    </main>
+
+    <!-- NOTES PAGE -->
+    <section id="notes" class="page">
+      <div class="notes-topbar">
+        <button id="addSticky" class="btn">+ Add Sticky</button>
+        <label>Sticky color:
+          <input id="stickyColor" type="color" value="#fff7a8">
+        </label>
+        <label>Font color:
+          <input id="notesFontColor" type="color" value="#222222">
+        </label>
+        <label>Font size:
+          <select id="notesFontSize">
+            <option value="13">13px</option>
+            <option value="14" selected>14px</option>
+            <option value="16">16px</option>
+            <option value="18">18px</option>
+          </select>
+        </label>
+      </div>
+      <div id="stickiesArea" class="stickiesArea"></div>
+    </section>
+
+    <!-- REMINDERS PAGE -->
+    <section id="reminders" class="page">
+      <div class="reminders-top">
+        <div class="rem-left">
+          <input id="remInput" placeholder="Add reminder..." />
+          <button id="addRemBtn" class="btn">Add</button>
+        </div>
+        <div class="rem-right">
+          <label>Bullet color:
+            <input id="remBulletColor" type="color" value="#6c63ff">
+          </label>
+          <label>Font color:
+            <input id="remFontColor" type="color" value="#222222">
+          </label>
+          <label>Font size:
+            <select id="remFontSize">
+              <option value="13">13px</option>
+              <option value="14" selected>14px</option>
+              <option value="16">16px</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <ul id="remList" class="rem-list"></ul>
+    </section>
+
+    <!-- DOCUMENTS PAGE -->
+    <section id="docs" class="page">
+      <div class="docs-top">
+        <input id="docTitle" placeholder="Document title..." style="flex:1;margin-right:10px"/>
+        <button id="newDoc" class="btn">New</button>
+        <button id="saveDoc" class="btn">Save</button>
+        <button id="downloadDoc" class="btn">Download</button>
+      </div>
+
+      <div class="docs-toolbar">
+        <button data-cmd="bold" class="tool">B</button>
+        <button data-cmd="italic" class="tool">I</button>
+        <button data-cmd="underline" class="tool">U</button>
+        <label>Font size
+          <select id="docFontSize">
+            <option value="14">14</option>
+            <option value="16" selected>16</option>
+            <option value="18">18</option>
+            <option value="20">20</option>
+          </select>
+        </label>
+        <label>Font color
+          <input id="docFontColor" type="color" value="#222222"/>
+        </label>
+      </div>
+
+      <div id="docEditor" class="docEditor" contenteditable="true" spellcheck="true">
+        <h2>Welcome — your document editor</h2>
+        <p>Type here. Use the toolbar to format text, pick font size and color. Documents save to your browser.</p>
+      </div>
+
+      <div class="docs-list-area">
+        <h4>Your documents</h4>
+        <ul id="docsList"></ul>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- small icon defs -->
+  <svg style="display:none">
+    <symbol id="icon-clock" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1a11 11 0 1 0 11 11A11 11 0 0 0 12 1Zm1 12.5V7h-2v6h5v-2h-3Z"/></symbol>
+  </svg>
+
+<script src="script.js"></script>
+</body>
+</html>
 
