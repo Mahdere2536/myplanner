@@ -18,7 +18,6 @@
         <button class="navbtn" data-page="docs">Documents</button>
       </nav>
     </header>
-
     <!-- PLANNER -->
     <main id="planner" class="page active-page">
       <div class="planner-top">
@@ -26,12 +25,10 @@
         <div id="weekTab" class="week-tab">Loading…</div>
         <button id="nextWeek" class="arrow">▶</button>
       </div>
-
       <div class="planner-wrap">
         <div id="leftSpread" class="spread left"></div>
         <div id="rightSpread" class="spread right"></div>
       </div>
-
       <div class="planner-controls">
         <label>Background:
           <select id="bgChoice">
@@ -41,16 +38,13 @@
             <option value="fall">Fall (leaves)</option>
             <option value="winter">Winter (snow)</option>
           </select>
-        </label>
-
+       </label>
         <label>Page color:
           <input id="pageColor" type="color" value="#fff8ea">
         </label>
-
         <label>Font color:
           <input id="plannerFontColor" type="color" value="#222222">
         </label>
-
         <label>Font size:
           <select id="plannerFontSize">
             <option value="13">13px</option>
@@ -61,7 +55,6 @@
         </label>
       </div>
     </main>
-
     <!-- NOTES -->
     <section id="notes" class="page">
       <div class="notes-top">
@@ -74,7 +67,6 @@
       </div>
       <div id="stickiesArea" class="stickiesArea"></div>
     </section>
-
     <!-- REMINDERS -->
     <section id="reminders" class="page">
       <div class="reminders-top">
@@ -90,7 +82,6 @@
       </div>
       <ul id="remList" class="rem-list"></ul>
     </section>
-
     <!-- DOCUMENTS -->
     <section id="docs" class="page">
       <div class="docs-top">
@@ -99,7 +90,6 @@
         <button id="saveDoc" class="btn">Save</button>
         <button id="downloadDoc" class="btn">Download</button>
       </div>
-
       <div class="docs-toolbar">
         <button data-cmd="bold" class="tool">B</button>
         <button data-cmd="italic" class="tool">I</button>
@@ -109,21 +99,16 @@
         </label>
         <label>Font color: <input id="docFontColor" type="color" value="#222"/></label>
       </div>
-
       <div id="docEditor" class="docEditor" contenteditable="true" spellcheck="true">
         <h3>Welcome — your document editor</h3>
         <p>Type here. Format, save, open, download.</p>
       </div>
-
       <div class="docs-list-area">
         <h4>Your documents</h4>
         <ul id="docsList"></ul>
       </div>
     </section>
-
   </div>
-
 <script src="script.js"></script>
 </body>
 </html>
-
