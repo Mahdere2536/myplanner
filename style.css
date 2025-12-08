@@ -63,7 +63,7 @@ body{margin:0;font-family:'Poppins',system-ui,Arial,sans-serif;background:var(--
 .docs-list-area li{padding:8px;border:1px dashed #eee;margin-bottom:8px;border-radius:8px;display:flex;justify-content:space-between;align-items:center}
 
 /* responsive */
-@media(max-width:920px){
+{media(max-width:920px)}
   .planner-wrap{flex-direction:column}
   .week-tab{min-width:240px}
 }
