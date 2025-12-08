@@ -1,5 +1,4 @@
 // My Planner (Option B - cute/stationery) core script
-
 /* helpers */
 const qs = s => document.querySelector(s);
 const qsa = s => document.querySelectorAll(s);
