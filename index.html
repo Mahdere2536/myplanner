@@ -1,93 +1,129 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <title>MyPlanner</title>
-  <link rel="stylesheet" href="styles.css"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>My Planner</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<header>
-  <h1>MyPlanner</h1>
-  <nav>
-    <button class="tab-btn active" data-tab="planner">Planner</button>
-    <button class="tab-btn" data-tab="notes">Notes</button>
-    <button class="tab-btn" data-tab="reminders">Reminders</button>
-    <button class="tab-btn" data-tab="docs">Documents</button>
-  </nav>
-</header>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand"><h1>My Planner</h1></div>
+      <nav class="mainnav" aria-label="Main navigation">
+        <button class="navbtn active" data-page="planner">Planner</button>
+        <button class="navbtn" data-page="notes">Notes</button>
+        <button class="navbtn" data-page="reminders">Reminders</button>
+        <button class="navbtn" data-page="docs">Documents</button>
+      </nav>
+    </header>
 
-<!-- ========== PLANNER ========== -->
-<section id="planner" class="tab-content active">
-  <div class="week-nav">
-    <button id="prevWeek">◀</button>
-    <span id="weekLabel"></span>
-    <button id="nextWeek">▶</button>
+    <!-- PLANNER -->
+    <main id="planner" class="page active-page">
+      <div class="planner-top">
+        <button id="prevWeek" class="arrow">◀</button>
+        <div id="weekTab" class="week-tab">Loading…</div>
+        <button id="nextWeek" class="arrow">▶</button>
+      </div>
+
+      <div class="planner-wrap">
+        <div id="leftSpread" class="spread left"></div>
+        <div id="rightSpread" class="spread right"></div>
+      </div>
+
+      <div class="planner-controls">
+        <label>Background:
+          <select id="bgChoice">
+            <option value="solid">Solid (default)</option>
+            <option value="spring">Spring (cherry)</option>
+            <option value="summer">Summer (beach)</option>
+            <option value="fall">Fall (leaves)</option>
+            <option value="winter">Winter (snow)</option>
+          </select>
+        </label>
+
+        <label>Page color:
+          <input id="pageColor" type="color" value="#fff8ea">
+        </label>
+
+        <label>Font color:
+          <input id="plannerFontColor" type="color" value="#222222">
+        </label>
+
+        <label>Font size:
+          <select id="plannerFontSize">
+            <option value="13">13px</option>
+            <option value="14" selected>14px</option>
+            <option value="16">16px</option>
+            <option value="18">18px</option>
+          </select>
+        </label>
+      </div>
+    </main>
+
+    <!-- NOTES -->
+    <section id="notes" class="page">
+      <div class="notes-top">
+        <button id="addSticky" class="btn">+ Add Sticky</button>
+        <label>Sticky color: <input id="stickyColor" type="color" value="#fff7a8"></label>
+        <label>Font color: <input id="notesFontColor" type="color" value="#222222"></label>
+        <label>Font size:
+          <select id="notesFontSize"><option value="13">13</option><option value="14" selected>14</option><option value="16">16</option></select>
+        </label>
+      </div>
+      <div id="stickiesArea" class="stickiesArea"></div>
+    </section>
+
+    <!-- REMINDERS -->
+    <section id="reminders" class="page">
+      <div class="reminders-top">
+        <div class="left">
+          <input id="remInput" placeholder="Add reminder..." />
+          <button id="addRemBtn" class="btn">Add</button>
+        </div>
+        <div class="right">
+          <label>Bullet color: <input id="remBulletColor" type="color" value="#FF6B6B"></label>
+          <label>Font color: <input id="remFontColor" type="color" value="#222"/></label>
+          <label>Font size: <select id="remFontSize"><option value="13">13</option><option value="14" selected>14</option><option value="16">16</option></select></label>
+        </div>
+      </div>
+      <ul id="remList" class="rem-list"></ul>
+    </section>
+
+    <!-- DOCUMENTS -->
+    <section id="docs" class="page">
+      <div class="docs-top">
+        <input id="docTitle" placeholder="Document title..." />
+        <button id="newDoc" class="btn">New</button>
+        <button id="saveDoc" class="btn">Save</button>
+        <button id="downloadDoc" class="btn">Download</button>
+      </div>
+
+      <div class="docs-toolbar">
+        <button data-cmd="bold" class="tool">B</button>
+        <button data-cmd="italic" class="tool">I</button>
+        <button data-cmd="underline" class="tool">U</button>
+        <label>Font size:
+          <select id="docFontSize"><option value="14">14</option><option value="16" selected>16</option><option value="18">18</option></select>
+        </label>
+        <label>Font color: <input id="docFontColor" type="color" value="#222"/></label>
+      </div>
+
+      <div id="docEditor" class="docEditor" contenteditable="true" spellcheck="true">
+        <h3>Welcome — your document editor</h3>
+        <p>Type here. Format, save, open, download.</p>
+      </div>
+
+      <div class="docs-list-area">
+        <h4>Your documents</h4>
+        <ul id="docsList"></ul>
+      </div>
+    </section>
+
   </div>
 
-  <div class="top-tab" id="topTab"></div>
-
-  <div class="planner-grid">
-    <div class="day-box" data-day="1"><h3>Monday</h3><textarea></textarea></div>
-    <div class="day-box" data-day="2"><h3>Tuesday</h3><textarea></textarea></div>
-    <div class="day-box" data-day="3"><h3>Wednesday</h3><textarea></textarea></div>
-    <div class="day-box" data-day="4"><h3>Thursday</h3><textarea></div>
-
-    <div class="day-box" data-day="5"><h3>Friday</h3><textarea></textarea></div>
-    <div class="day-box" data-day="6"><h3>Saturday</h3><textarea></textarea></div>
-    <div class="day-box" data-day="0"><h3>Sunday</h3><textarea></textarea></div>
-    <div class="day-box notes-box"><h3>Notes</h3><textarea placeholder="Extra notes…"></textarea></div>
-  </div>
-
-  <div class="controls">
-    <label>Theme:
-      <select id="themeSelect">
-        <option value="solid">Solid</option>
-        <option value="spring">Spring 🌸</option>
-        <option value="summer">Summer ☀️</option>
-        <option value="autumn">Autumn 🍂</option>
-        <option value="winter">Winter ❄️</option>
-      </select>
-    </label>
-
-    <label>Font
-      <input type="color" id="fontColor" value="#222222">
-      <input type="number" id="fontSize" min="10" max="30" value="14">
-    </label>
-  </div>
-</section>
-
-<!-- ========== NOTES ========== -->
-<section id="notes" class="tab-content">
-  <button id="addNote">+ New Note</button>
-  <div id="notesBoard"></div>
-  <div class="controls">
-    <label>Sticky color <input type="color" id="noteColor" value="#fff9c4"></label>
-    <label>Font <input type="color" id="noteFontColor" value="#333">
-           <input type="number" id="noteFontSize" min="10" max="30" value="14"></label>
-  </div>
-</section>
-
-<!-- ========== REMINDERS ========== -->
-<section id="reminders" class="tab-content">
-  <button id="addReminder">+ Add Reminder</button>
-  <ul id="reminderList"></ul>
-  <div class="controls">
-    <label>Bullet color <input type="color" id="bulletColor" value="#673ab7"></label>
-    <label>Font <input type="color" id="remFontColor" value="#333">
-           <input type="number" id="remFontSize" min="10" max="30" value="14"></label>
-  </div>
-</section>
-
-<!-- ========== DOCUMENTS ========== -->
-<section id="docs" class="tab-content">
-  <button id="newDoc">+ New Document</button>
-  <input type="text" id="docTitle" placeholder="Document title…">
-  <div id="docEditor" contenteditable="true"></div>
-  <button id="saveDoc">Save</button>
-  <div id="docList"></div>
-</section>
-
-<script src="app.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
+
