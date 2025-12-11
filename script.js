@@ -1,108 +1,223 @@
-/* ---------- TABS ---------- */
-document.querySelectorAll('.tab-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(p=>p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById(btn.dataset.tab).classList.add('active');
+// My Planner (Option B - cute/stationery) core script
+
+/* helpers */
+const qs = s => document.querySelector(s);
+const qsa = s => document.querySelectorAll(s);
+const uid = ()=> Date.now() + Math.floor(Math.random()*999);
+
+/* Nav */
+qsa('.navbtn').forEach(b=>{
+  b.addEventListener('click', e=>{
+    qsa('.navbtn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    const page = b.dataset.page;
+    qsa('.page').forEach(p=>p.classList.remove('active-page'));
+    qs(`#${page}`).classList.add('active-page');
   });
 });
 
-/* ---------- PLANNER ---------- */
-const rainbow = ['#e91e63','#9c27b0','#3f51b5','#03a9f4','#009688','#8bc34a','#ffc107'];
+/* Week logic & tab colors */
+const weekTab = qs('#weekTab');
+const prevWeek = qs('#prevWeek');
+const nextWeek = qs('#nextWeek');
+const leftSpread = qs('#leftSpread');
+const rightSpread = qs('#rightSpread');
+const colors = ["#FF9AA2","#FFB7B2","#FFDAC1","#E2F0CB","#B5EAD7","#C7CEEA","#D7BDE2","#F7C6FF","#FFC0CB","#B4A6FF"];
 let weekOffset = 0;
-function renderWeek(){
-  const mon = new Date();
-  mon.setDate(mon.getDate() - mon.getDay() + 1 + weekOffset*7);
-  const sun = new Date(mon); sun.setDate(mon.getDate()+6);
-  const label = `${mon.toLocaleDateString()} – ${sun.toLocaleDateString()}`;
-  document.getElementById('weekLabel').textContent = label;
-  // rainbow tab
-  const color = rainbow[Math.abs(weekOffset) % rainbow.length];
-  document.documentElement.style.setProperty('--tabRainbow', color);
-  // background
-  const theme = localStorage.getItem('theme') || 'solid';
-  setTheme(theme);
-}
-document.getElementById('prevWeek').onclick = ()=>{ weekOffset--; renderWeek(); };
-document.getElementById('nextWeek').onclick = ()=>{ weekOffset++; renderWeek(); };
-document.getElementById('themeSelect').onchange = e=>{ localStorage.setItem('theme', e.target.value); setTheme(e.target.value); };
-function setTheme(t){
-  const root = document.documentElement;
-  if(t==='spring')  root.style.setProperty('--bgSolid', "url('https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=1400&q=60') center/cover no-repeat");
-  else if(t==='summer') root.style.setProperty('--bgSolid', "url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=60') center/cover no-repeat");
-  else if(t==='autumn') root.style.setProperty('--bgSolid', "url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1400&q=60') center/cover no-repeat");
-  else if(t==='winter') root.style.setProperty('--bgSolid', "url('https://images.unsplash.com/photo-1483664852095-d6cc6870702d?auto=format&fit=crop&w=1400&q=60') center/cover no-repeat");
-  else root.style.setProperty('--bgSolid', '#fce4ec');
-}
-renderWeek();
 
-/* font controls planner */
-document.getElementById('fontColor').oninput = e=> document.querySelectorAll('.day-box textarea').forEach(t=>t.style.color=e.target.value);
-document.getElementById('fontSize').oninput = e=> document.querySelectorAll('.day-box textarea').forEach(t=>t.style.fontSize=e.target.value+'px');
-
-/* ---------- NOTES ---------- */
-let noteCount=0;
-document.getElementById('addNote').onclick = ()=>{
-  const board = document.getElementById('notesBoard');
-  const sticky = document.createElement('div'); sticky.className='sticky';
-  sticky.innerHTML = `<button class="del">✖</button><textarea placeholder="Type here…"></textarea>`;
-  board.appendChild(sticky);
-  sticky.querySelector('.del').onclick = ()=>sticky.remove();
-  applyNoteStyles(sticky);
-};
-function applyNoteStyles(sticky){
-  sticky.style.background = document.getElementById('noteColor').value;
-  const ta = sticky.querySelector('textarea');
-  ta.style.color = document.getElementById('noteFontColor').value;
-  ta.style.fontSize = document.getElementById('noteFontSize').value+'px';
+function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+function mondayFrom(d){ const dt=new Date(d); const day = dt.getDay(); const diff = dt.getDate() - day + (day===0?-6:1); const m = new Date(dt.setDate(diff)); m.setHours(0,0,0,0); return m; }
+function fmt(d){ return `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}/${d.getFullYear()}`; }
+function weekBase(offset){
+  const base = addDays(new Date(), offset*7);
+  const mon = mondayFrom(base);
+  const sun = addDays(mon,6);
+  return {mon,sun};
 }
-['noteColor','noteFontColor','noteFontSize'].forEach(id=>{
-  document.getElementById(id).oninput = ()=> document.querySelectorAll('.sticky').forEach(applyNoteStyles);
-});
+function weekKey(mon){ return 'planner_week_' + mon.toISOString().slice(0,10); }
 
-/* ---------- REMINDERS ---------- */
-document.getElementById('addReminder').onclick = ()=>{
-  const ul = document.getElementById('reminderList');
-  const li = document.createElement('li'); li.className='reminder';
-  li.innerHTML = `<input type="text" placeholder="Reminder…">
-                  <input type="datetime-local">
-                  <button class="del">✖</button>`;
-  ul.appendChild(li);
-  li.querySelector('.del').onclick = ()=>li.remove();
-  applyRemStyles(li);
-};
-function applyRemStyles(li){
-  const color = document.getElementById('bulletColor').value;
-  li.style.setProperty('--bulletColor', color);
-  const inp = li.querySelector('input[type=text]');
-  inp.style.color = document.getElementById('remFontColor').value;
-  inp.style.fontSize = document.getElementById('remFontSize').value+'px';
+function setWeekTab(){
+  const {mon,sun} = weekBase(weekOffset);
+  weekTab.textContent = `${fmt(mon)} - ${fmt(sun)}`;
+  const idx = Math.abs(Math.floor(mon.getTime()/86400000/7)) % colors.length;
+  weekTab.style.background = colors[idx];
+  // set default page color if user hasn't changed it yet (do not override after change)
+  const pageColorEl = qs('#pageColor');
+  if(!pageColorEl.dataset.userChanged){
+    pageColorEl.value = colors[idx];
+  }
+  buildPlanner();
 }
-['bulletColor','remFontColor','remFontSize'].forEach(id=>{
-  document.getElementById(id).oninput = ()=> document.querySelectorAll('.reminder').forEach(applyRemStyles);
-});
 
-/* ---------- DOCS ---------- */
-let docs = JSON.parse(localStorage.getItem('myDocs')||'{}');
-function listDocs(){
-  const box = document.getElementById('docList');
-  box.innerHTML = '';
-  Object.keys(docs).forEach(title=>{
-    const card = document.createElement('div'); card.className='docCard';
-    card.textContent = title;
-    card.onclick = ()=>{ document.getElementById('docTitle').value = title; document.getElementById('docEditor').innerHTML = docs[title]; };
-    box.appendChild(card);
+/* Build planner DOM */
+function buildPlanner(){
+  leftSpread.innerHTML=''; rightSpread.innerHTML='';
+  const {mon} = weekBase(weekOffset);
+  const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  for(let i=0;i<7;i++){
+    const d = addDays(mon,i);
+    const iso = d.toISOString().slice(0,10);
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'day';
+    dayDiv.dataset.iso = iso;
+    dayDiv.innerHTML = `
+      <div class="day-header">
+        <div>
+          <div class="day-title">${labels[i]}</div>
+          <div class="day-date">${fmt(d)}</div>
+        </div>
+        <div class="icons"></div>
+      </div>
+      <div class="events" data-events></div>
+      <div class="add-row">
+        <input type="time" data-time>
+        <input type="text" data-text placeholder="Add event (e.g. Rehearsal)">
+        <button class="btn" data-add>+</button>
+      </div>
+    `;
+    if(i<4) leftSpread.appendChild(dayDiv); else rightSpread.appendChild(dayDiv);
+  }
+
+  // add the notes box at bottom-right as 8th box
+  const notesBox = document.createElement('div');
+  notesBox.className='day';
+  notesBox.innerHTML = `
+    <div class="day-header"><div class="day-title">Notes</div></div>
+    <div class="events" id="weekNotesArea" contenteditable="true" style="min-height:120px;padding:10px"></div>
+  `;
+  rightSpread.appendChild(notesBox);
+
+  // attach add handlers
+  qsa('[data-add]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const root = btn.closest('.day');
+      const iso = root.dataset.iso;
+      const t = root.querySelector('[data-time]').value;
+      const txt = root.querySelector('[data-text]').value.trim();
+      if(!txt) return;
+      const arr = JSON.parse(localStorage.getItem(iso) || '[]');
+      arr.push({id:uid(),time:t||'00:00',text:txt});
+      arr.sort((a,b)=> (a.time||'00:00') > (b.time||'00:00') ? 1 : -1);
+      localStorage.setItem(iso, JSON.stringify(arr));
+      root.querySelector('[data-text]').value='';
+      root.querySelector('[data-time]').value='';
+      loadWeekEvents();
+    });
   });
+
+  loadWeekEvents();
 }
-document.getElementById('saveDoc').onclick = ()=>{
-  const title = document.getElementById('docTitle').value.trim() || 'Untitled';
-  docs[title] = document.getElementById('docEditor').innerHTML;
-  localStorage.setItem('myDocs', JSON.stringify(docs));
-  listDocs();
-};
-document.getElementById('newDoc').onclick = ()=>{
-  document.getElementById('docTitle').value='';
-  document.getElementById('docEditor').innerHTML='';
-};
-listDocs();
+
+/* load events */
+function loadWeekEvents(){
+  qsa('.day').forEach(day=>{
+    const iso = day.dataset.iso;
+    const eventsContainer = day.querySelector('[data-events]');
+    if(!eventsContainer) return;
+    eventsContainer.innerHTML='';
+    const arr = JSON.parse(localStorage.getItem(iso) || '[]');
+    arr.sort((a,b)=> (a.time||'00:00') > (b.time||'00:00') ? 1 : -1);
+    arr.forEach(it=>{
+      const el = document.createElement('div'); el.className='event-item';
+      el.innerHTML = `<div class="event-time">${it.time}</div><div style="flex:1">${escapeHtml(it.text)}</div><button class="btn ghost" data-del="${it.id}" style="padding:6px 8px">x</button>`;
+      eventsContainer.appendChild(el);
+      el.querySelector('[data-del]').addEventListener('click', ()=>{
+        const list = JSON.parse(localStorage.getItem(iso) || '[]').filter(x=>x.id!==it.id);
+        localStorage.setItem(iso, JSON.stringify(list)); loadWeekEvents();
+      });
+    });
+  });
+
+  // week notes
+  const {mon} = weekBase(weekOffset);
+  const key = weekKey(mon);
+  const noteArea = qs('#weekNotesArea');
+  if(noteArea){
+    noteArea.innerHTML = localStorage.getItem(key + '_notes') || '';
+    noteArea.onblur = ()=> localStorage.setItem(key + '_notes', noteArea.innerHTML);
+  }
+}
+
+/* week nav */
+prevWeek.addEventListener('click', ()=>{ weekOffset--; setWeekTab(); });
+nextWeek.addEventListener('click', ()=>{ weekOffset++; setWeekTab(); });
+
+/* page bg / styles */
+qs('#bgChoice').addEventListener('change', applyPageStyles);
+const pageColorEl = qs('#pageColor');
+pageColorEl.addEventListener('change', ()=>{ pageColorEl.dataset.userChanged = "1"; applyPageStyles(); });
+qs('#plannerFontColor').addEventListener('change', applyFonts);
+qs('#plannerFontSize').addEventListener('change', applyFonts);
+
+function applyPageStyles(){
+  const choice = qs('#bgChoice').value;
+  const color = pageColorEl.value;
+  [qs('#leftSpread'), qs('#rightSpread')].forEach(el=>{
+    el.style.background = color;
+    el.style.backgroundImage = 'none';
+    if(choice==='spring') el.style.backgroundImage = "url('images/spring-cherry.jpg')";
+    if(choice==='summer') el.style.backgroundImage = "url('images/summer-beach.jpg')";
+    if(choice==='fall') el.style.backgroundImage = "url('images/fall-leaves.jpg')";
+    if(choice==='winter') el.style.backgroundImage = "url('images/winter-snowman.jpg')";
+    el.style.backgroundSize = 'cover';
+    el.style.backgroundPosition = 'center';
+  });
+  applyFonts();
+}
+function applyFonts(){
+  const color = qs('#plannerFontColor').value;
+  const size = qs('#plannerFontSize').value + 'px';
+  qsa('.day, .events, .day-title, .day-date').forEach(el=>{ el.style.color=color; el.style.fontSize=size; });
+}
+
+/* notes (stickies) */
+const stickiesArea = qs('#stickiesArea');
+qs('#addSticky').addEventListener('click', ()=> createSticky());
+function createSticky(data){
+  const s = data || {id:uid(),text:'',color:qs('#stickyColor').value};
+  const arr = JSON.parse(localStorage.getItem('stickies')||'[]'); arr.push(s); localStorage.setItem('stickies', JSON.stringify(arr));
+  renderSticky(s);
+}
+function loadStickies(){ stickiesArea.innerHTML=''; const arr=JSON.parse(localStorage.getItem('stickies')||'[]'); arr.forEach(renderSticky); }
+function renderSticky(s){
+  const el = document.createElement('div'); el.className='sticky'; el.style.background=s.color; el.dataset.id=s.id;
+  el.innerHTML = `<button class="remove">✕</button><textarea placeholder="Note...">${s.text||''}</textarea>`;
+  stickiesArea.prepend(el);
+  el.querySelector('.remove').addEventListener('click', ()=>{ const arr=JSON.parse(localStorage.getItem('stickies')||'[]').filter(x=>x.id!==s.id); localStorage.setItem('stickies', JSON.stringify(arr)); el.remove(); });
+  const ta = el.querySelector('textarea'); ta.addEventListener('blur', ()=>{ const arr=JSON.parse(localStorage.getItem('stickies')||'[]'); const idx = arr.findIndex(x=>x.id===s.id); if(idx>-1){ arr[idx].text = ta.value; arr[idx].color = el.style.background; localStorage.setItem('stickies', JSON.stringify(arr)); } });
+  applyNotesFont();
+}
+function applyNotesFont(){ const color = qs('#notesFontColor').value; const size = qs('#notesFontSize').value + 'px'; qsa('.sticky textarea').forEach(t=>{ t.style.color=color; t.style.fontSize=size; }); }
+
+/* reminders */
+qs('#addRemBtn').addEventListener('click', addReminder);
+function addReminder(){ const txt = qs('#remInput').value.trim(); if(!txt) return; const arr=JSON.parse(localStorage.getItem('reminders')||'[]'); arr.push({id:uid(),text:txt,done:false,color:qs('#remBulletColor').value}); localStorage.setItem('reminders', JSON.stringify(arr)); qs('#remInput').value=''; renderReminders(); }
+function renderReminders(){ const arr=JSON.parse(localStorage.getItem('reminders')||'[]'); const list=qs('#remList'); list.innerHTML=''; arr.forEach(it=>{ const li=document.createElement('li'); li.className='rem-item'; li.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><span class="rem-bullet" style="background:${it.color};opacity:${it.done?0.4:1}"></span><div style="flex:1;color:${qs('#remFontColor').value};font-size:${qs('#remFontSize').value}px">${it.text}</div></div><div><button class="btn ghost" data-rid="${it.id}">x</button></div>`; list.appendChild(li); li.querySelector('.rem-bullet').addEventListener('click', ()=>{ it.done=!it.done; const copy=JSON.parse(localStorage.getItem('reminders')||'[]'); const idx=copy.findIndex(x=>x.id===it.id); if(idx>-1){ copy[idx].done = it.done; localStorage.setItem('reminders', JSON.stringify(copy)); } renderReminders(); }); li.querySelector('[data-rid]').addEventListener('click', (e)=>{ const id=e.target.dataset.rid; const remaining=JSON.parse(localStorage.getItem('reminders')||'[]').filter(x=>x.id!=id); localStorage.setItem('reminders', JSON.stringify(remaining)); renderReminders(); }); }); }
+qs('#remBulletColor').addEventListener('change', renderReminders); qs('#remFontColor').addEventListener('change', renderReminders); qs('#remFontSize').addEventListener('change', renderReminders);
+
+/* documents */
+const docsList = qs('#docsList'); const docEditor = qs('#docEditor'); const docTitle = qs('#docTitle');
+function loadDocs(){ docsList.innerHTML=''; const docs=JSON.parse(localStorage.getItem('docs')||'[]'); docs.forEach(d=>{ const li=document.createElement('li'); li.innerHTML = `<div style="flex:1">${d.title}</div><div><button class="btn" data-open="${d.id}">Open</button><button class="btn ghost" data-del="${d.id}">Del</button></div>`; docsList.appendChild(li); li.querySelector('[data-open]').addEventListener('click', ()=> openDoc(d.id)); li.querySelector('[data-del]').addEventListener('click', ()=> deleteDoc(d.id)); }); }
+function newDoc(){ docEditor.innerHTML='<p></p>'; docTitle.value='Untitled'; }
+function saveDoc(){ const docs=JSON.parse(localStorage.getItem('docs')||'[]'); const id=uid(); const obj={id,title:docTitle.value||'Untitled',content:docEditor.innerHTML,updated:Date.now()}; docs.push(obj); localStorage.setItem('docs', JSON.stringify(docs)); loadDocs(); alert('Saved'); }
+function openDoc(id){ const docs=JSON.parse(localStorage.getItem('docs')||'[]'); const doc=docs.find(d=>d.id==id); if(doc){ docTitle.value=doc.title; docEditor.innerHTML=doc.content; } }
+function deleteDoc(id){ const docs=JSON.parse(localStorage.getItem('docs')||'[]').filter(d=>d.id!=id); localStorage.setItem('docs', JSON.stringify(docs)); loadDocs(); }
+qs('#newDoc').addEventListener('click', newDoc); qs('#saveDoc').addEventListener('click', saveDoc); qs('#downloadDoc').addEventListener('click', ()=>{ const blob=new Blob([docEditor.innerHTML], {type:'text/html'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=(docTitle.value||'document')+'.html'; a.click(); });
+
+qsa('.docs-toolbar [data-cmd]').forEach(b=>{ b.addEventListener('click', ()=> document.execCommand(b.dataset.cmd, false, null)); });
+qs('#docFontSize').addEventListener('change', ()=> docEditor.style.fontSize = qs('#docFontSize').value + 'px');
+qs('#docFontColor').addEventListener('change', ()=> docEditor.style.color = qs('#docFontColor').value);
+
+/* small helpers */
+function escapeHtml(s){ if(!s) return ''; return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+/* init */
+function init(){
+  setWeekTab();
+  loadStickies();
+  renderReminders();
+  loadDocs();
+  // apply initial styles
+  applyPageStyles();
+}
+init();
